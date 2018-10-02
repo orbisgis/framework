@@ -45,11 +45,6 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
             </plugin>
-            <!-- Check of the test coverage -->
-            <!--<plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-            </plugin>-->
             <!-- Compilation -->
             <plugin>
                 <groupId>org.apache.felix</groupId>

@@ -92,30 +92,6 @@
                         </arguments>
                     </configuration>
                 </plugin>
-                <!-- Check of the test coverage -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>cobertura-maven-plugin</artifactId>
-                    <version>2.7</version>
-                    <configuration>
-                        <check>
-                            <branchRate>100</branchRate>
-                            <lineRate>100</lineRate>
-                            <haltOnFailure>true</haltOnFailure>
-                            <totalBranchRate>100</totalBranchRate>
-                            <totalLineRate>100</totalLineRate>
-                            <packageLineRate>100</packageLineRate>
-                            <packageBranchRate>100</packageBranchRate>
-                        </check>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
                 <!-- Generation of the OSGI bundle -->
                 <plugin>
                     <groupId>org.apache.felix</groupId>
