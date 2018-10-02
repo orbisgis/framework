@@ -36,13 +36,6 @@
  */
 package org.orbisgis.framework.root;
 
-Build config file is required via repository settings, but config is empty.
-        master 6dfc7e9
-        5 minutes ago
-        Basic application
-        -
-
-
 import org.apache.felix.framework.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
