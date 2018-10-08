@@ -312,7 +312,7 @@ public class Main {
         }
         //Check the --noFail argument
         if(line.hasOption("noFail")){
-            LOGGER.log(Logger.LOG_INFO, "Clear the workspace in 5 seconds.");
+            LOGGER.log(Logger.LOG_INFO, "Clear the system workspace in 5 seconds.");
             NO_FAIL_MODE = true;
             try {
                 Thread.sleep(5000);
