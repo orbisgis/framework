@@ -15,6 +15,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>root</module>
+        <module>bundle-manager-api</module>
         <module>dist</module>
     </modules>
     <properties>
@@ -33,6 +34,11 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>6.0.0</version>
+            </dependency>
+            <dependency>
                 <groupId>org.codehaus.groovy</groupId>
                 <artifactId>groovy-console</artifactId>
                 <version>2.5.2</version>
@@ -46,6 +52,11 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.main</artifactId>
                 <version>6.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.osgi.service.obr</artifactId>
+                <version>1.0.2</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
