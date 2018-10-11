@@ -245,8 +245,8 @@ public class Main {
      * @return True if the version is supported, false otherwise.
      */
     private static boolean checkJavaVersion() {
-        LOGGER.log(Logger.LOG_DEBUG, "Check java version : "+System.getProperty("java.version"));
         String actualVersion = System.getProperty("java.version");
+        LOGGER.log(Logger.LOG_DEBUG, "Check java version : "+actualVersion);
         if(actualVersion.startsWith("1.")) {
             actualVersion = actualVersion.substring(2, 3);
         }
