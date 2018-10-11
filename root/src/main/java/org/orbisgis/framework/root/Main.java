@@ -73,6 +73,7 @@ public class Main {
 
     private static final Logger LOGGER = new Logger();
     private static final String OBR_REPOSITORY_URL = "obr.repository.url";
+
     private static final String OBR_REPOSITORY_SNAPSHOT_URL = "obr.repository.snapshot.url";
     private static final Version VERSION = new Version(6, 0, 0, "SNAPSHOT");
 
@@ -244,8 +245,8 @@ public class Main {
      * @return True if the version is supported, false otherwise.
      */
     private static boolean checkJavaVersion() {
-        LOGGER.log(Logger.LOG_DEBUG, "Check java version");
         String actualVersion = System.getProperty("java.version");
+        LOGGER.log(Logger.LOG_DEBUG, "Check java version : "+actualVersion);
         if(actualVersion.startsWith("1.")) {
             actualVersion = actualVersion.substring(2, 3);
         }
