@@ -106,7 +106,16 @@ public interface IBundleItem {
     boolean isStarted();
 
 
+    /**
+     * Indicates if the bundle is ready for updating.
+     *
+     * @return True if the bundle is ready for updating, false otherwise.
+     */
     boolean isUpdateReady();
+
+    /**
+     * Update the bundle.
+     */
     void update();
 
 
