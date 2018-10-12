@@ -154,9 +154,10 @@ public class BundleItem implements IBundleItem {
 
     @Override
     public void start() {
-        if(getBundle() != null && isStartReady()) {
+        Bundle bundle = getBundle();
+        if(bundle != null && isStartReady()) {
             try {
-                getBundle().start();
+                bundle.start();
             } catch (BundleException e) {
                 LOGGER.error("Unable to start the bundle '" + getBundle().getSymbolicName() +
                         "'.\n" + e.getLocalizedMessage());
@@ -193,9 +194,10 @@ public class BundleItem implements IBundleItem {
 
     @Override
     public void update() {
-        if(getBundle() != null && isUpdateReady()) {
+        Bundle bundle = getBundle();
+        if(bundle != null && isUpdateReady()) {
             try {
-                getBundle().update();
+                bundle.update();
             } catch (BundleException e) {
                 LOGGER.error("Unable to update the bundle '" + getBundle().getSymbolicName() +
                         "'.\n" + e.getLocalizedMessage());
@@ -208,9 +210,10 @@ public class BundleItem implements IBundleItem {
 
     @Override
     public void stop() {
-        if(getBundle() != null && isStopReady()) {
+        Bundle bundle = getBundle();
+        if(bundle != null && isStopReady()) {
             try {
-                getBundle().stop();
+                bundle.stop();
             } catch (BundleException e) {
                 LOGGER.error("Unable to stop the bundle '" + getBundle().getSymbolicName() +
                         "'.\n" + e.getLocalizedMessage());
@@ -245,9 +248,10 @@ public class BundleItem implements IBundleItem {
 
     @Override
     public void uninstall() {
-        if(getBundle() != null && isUninstallReady()) {
+        Bundle bundle = getBundle();
+        if(bundle != null && isUninstallReady()) {
             try {
-                getBundle().uninstall();
+                bundle.uninstall();
                 id = -1;
             } catch (BundleException e) {
                 LOGGER.error("Unable to start the bundle '" + getBundle().getSymbolicName() +
