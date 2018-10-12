@@ -16,6 +16,7 @@
     <modules>
         <module>root</module>
         <module>bundle-manager-api</module>
+        <module>bundle-manager</module>
         <module>dist</module>
     </modules>
     <properties>
