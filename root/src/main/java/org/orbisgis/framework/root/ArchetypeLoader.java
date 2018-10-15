@@ -36,12 +36,14 @@
  */
 package org.orbisgis.framework.root;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.felix.framework.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -71,11 +73,19 @@ public class ArchetypeLoader {
             return;
         }
         Map<String, String> bundleNameSourceMap = new HashMap<>();
-        Collections.list(properties.propertyNames()).forEach((source)->{
-            if(source.toString().startsWith("source.")){
-                String bundleName = properties.getProperty("bundle."+source);
-                Arrays.stream(bundleName.split(","))
-                        .forEachOrdered(str -> bundleNameSourceMap.put(str,  properties.getProperty(source.toString())));
+        Collections.list(properties.propertyNames()).forEach((bundle)->{
+            if(bundle.toString().startsWith("bundle.")){
+                String bundleSource = properties.getProperty(bundle.toString());
+                String bundleLocation = properties.containsKey("location."+bundle)?properties.getProperty("location."+bundle):"";
+                String path = coreWorkspace.getBundleFolderPath();
+                if(bundleLocation.equals("..")){
+                    path = coreWorkspace.getWorkspaceFolderPath();
+                }
+                else if(!bundleLocation.isEmpty()){
+                    path = new File(coreWorkspace.getWorkspaceFolderPath(), bundleLocation).getAbsolutePath();
+                }
+
+                bundleNameSourceMap.put(bundleSource, path);
             }
         });
 
@@ -88,44 +98,66 @@ public class ArchetypeLoader {
                 it.remove();
             }
             else{
-                if(!downloadBundle(coreWorkspace.getBundleFolderPath(), entry.getKey(), entry.getValue(), logger)){
+                if(!downloadBundle(entry.getValue(), entry.getKey(), logger)){
                     it.remove();
                 }
             }
         }
 
-        //Launch All the bundle in not already present
-        bundleNameSourceMap.forEach((key, value) -> {
-            if (isBundleInCache(key, coreWorkspace.getBundleFolderPath(), bundleContext)) {
-                logger.log(Logger.LOG_DEBUG, "The bundle '" + key + "' is already installed");
-            }
-            else{
+        if (bundleContext != null) {
+            //Launch All the bundle in not already present
+            bundleNameSourceMap.forEach((key, value) -> {
+                URL url;
                 try {
-                    logger.log(Logger.LOG_DEBUG, "Installing bundle '" + key + "'");
-                    bundleContext.installBundle(key, new FileInputStream(new File(coreWorkspace.getBundleFolderPath(), key)));
-                    bundleContext.getBundle(key).start();
-                    logger.log(Logger.LOG_DEBUG, "The bundle '" + key + "' has been installed");
-                } catch (BundleException e) {
-                    logger.log(Logger.LOG_ERROR, "An error occurred while installing the bundle '" + key + "'");
-                } catch (FileNotFoundException e) {
-                    logger.log(Logger.LOG_ERROR, "An error occurred while finding the file '" + key + "'");
+                    url = new URL(key);
+                } catch (MalformedURLException e) {
+                    logger.log(Logger.LOG_WARNING, "Cannot open the URL :"+key);
+                    return;
                 }
-            }
-        });
+                String fileName = FilenameUtils.getName(url.getPath());
+                if (isBundleInCache(key, value, bundleContext)) {
+                    logger.log(Logger.LOG_DEBUG, "The bundle '" + fileName + "' is already installed");
+                }
+                else{
+                    try {
+                        logger.log(Logger.LOG_DEBUG, "Installing bundle '" + fileName + "'");
+                        bundleContext.installBundle(fileName, new FileInputStream(new File(value, fileName)));
+                        bundleContext.getBundle(fileName).start();
+                        logger.log(Logger.LOG_DEBUG, "The bundle '" + fileName + "' has been installed");
+                    } catch (BundleException e) {
+                        logger.log(Logger.LOG_ERROR, "An error occurred while installing the bundle '" + fileName + "'");
+                    } catch (FileNotFoundException e) {
+                        logger.log(Logger.LOG_ERROR, "An error occurred while finding the file '" + fileName + "'");
+                    }
+                }
+            });
+        }
     }
 
-    private static boolean downloadBundle(String bundleFolder, String fileName, String source, Logger logger){
-        logger.log(Logger.LOG_DEBUG, "Downloading the bundle '"+fileName+"' from '"+source+"'");
+    private static boolean downloadBundle(String bundleFolder, String source, Logger logger){
+        URL url;
+        try {
+            url = new URL(source);
+        } catch (MalformedURLException e) {
+            logger.log(Logger.LOG_WARNING, "Cannot open the URL :"+source);
+            return false;
+        }
+        String fileName = FilenameUtils.getName(url.getPath());
+        logger.log(Logger.LOG_DEBUG, "Downloading the bundle '"+source+"'");
 
         InputStream inputStream;
         try {
-            inputStream = new URL(source + "/" + fileName).openStream();
+            inputStream = new URL(source).openStream();
         } catch (IOException e) {
-            logger.log(Logger.LOG_WARNING, "Cannot open the URL :"+source+"/"+fileName);
+            logger.log(Logger.LOG_WARNING, "Cannot open the URL :"+source);
             return false;
         }
         boolean result = true;
         try {
+            if(!new File(bundleFolder).exists() && !new File(bundleFolder).mkdirs()){
+                logger.log(Logger.LOG_WARNING, "Cannot create directory '"+bundleFolder+"'");
+                return false;
+            }
             ReadableByteChannel rbc = Channels.newChannel(inputStream);
             FileOutputStream fos = new FileOutputStream(new File(bundleFolder, fileName));
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
@@ -141,8 +173,15 @@ public class ArchetypeLoader {
         return result;
     }
 
-    private static boolean isBundleInCache(String bundleFileName, String bundleFolder, BundleContext bundleContext){
-        try(JarFile jar = new JarFile(new File(bundleFolder, bundleFileName))){
+    private static boolean isBundleInCache(String source, String bundleFolder, BundleContext bundleContext){
+        URL url;
+        try {
+            url = new URL(source);
+        } catch (MalformedURLException e) {
+            return false;
+        }
+        String fileName = FilenameUtils.getName(url.getPath());
+        try(JarFile jar = new JarFile(new File(bundleFolder, fileName))){
             Manifest manifest = jar.getManifest();
             Attributes attributes = manifest.getMainAttributes();
             String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
