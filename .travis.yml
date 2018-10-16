@@ -4,4 +4,11 @@ jdk:
   - openjdk11
   - oraclejdk8
   - oraclejdk11
+
+addons:
+  apt:
+    packages:
+      - openjfx
+before_install:
+  - if [[ "$JENV" == "*openjdk8" ]]; then sudo apt-get update -q && sudo apt-get install openjfx -y
 script: mvn clean install
