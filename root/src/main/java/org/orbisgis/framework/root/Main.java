@@ -105,9 +105,10 @@ public class Main {
     }
 
     /**
-     * Start the Drombler framework.
+     * Start the Drombler framework used for the generation of the UI.
      */
     private static void startDrombler(){
+        //First load the UI archetype
         try {
             File archFile = new File(systemWorkspace.getWorkspaceFolderPath(), UI_ARCHETYPE);
             InputStream inStream = Main.class.getResourceAsStream(UI_ARCHETYPE);
@@ -118,6 +119,7 @@ public class Main {
         catch(Exception e){
             LOGGER.log(Logger.LOG_ERROR, "Unable to load the archetype '"+NO_UI_ARCHETYPE+"'.\n"+e.getLocalizedMessage());
         }
+        //Launch the Drombler framework
         try {
             DromblerFXApplication.main("--installdir", systemWorkspace.getWorkspaceFolderPath(),
                     "--userdir", systemWorkspace.getWorkspaceFolderPath());

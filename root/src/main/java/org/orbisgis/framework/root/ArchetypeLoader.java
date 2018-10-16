@@ -59,6 +59,14 @@ import java.util.jar.Manifest;
  * @author Erwan Bocher (CNRS)
  */
 public class ArchetypeLoader {
+
+    /**
+     * Load the given archetype by downloading the bundle into the given  {@link org.orbisgis.framework.root.ISystemWorkspace}
+     * @param coreWorkspace
+     * @param bundleContext
+     * @param archetypePath
+     * @param logger
+     */
     public static void loadArchetype(ISystemWorkspace coreWorkspace, BundleContext bundleContext, String archetypePath, Logger logger){
         logger.log(Logger.LOG_DEBUG, "Loading the archetype : "+archetypePath);
         if(!new File(archetypePath).exists()){

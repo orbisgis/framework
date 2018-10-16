@@ -48,9 +48,6 @@ import java.io.File;
  */
 public class SystemWorkspace implements ISystemWorkspace {
 
-    /** Path of the config.properties file to give to Felix.*/
-    private String felixConfigPath;
-
     /** OrbisGIS major version.*/
     private final int versionMajor;
     /** OrbisGIS minor version.*/
