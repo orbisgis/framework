@@ -97,15 +97,8 @@ public interface ISystemWorkspace {
     String getLogFilePath();
 
     /**
-     * Set the path of the config.properties file used by Felix.
-     *
-     * @param felixConfigPath The path of the config.properties file used by Felix.
+     * Get the path of the configuration files used by Felix.
+     * @return The path of the configuration files used by Felix.
      */
-    void setFelixConfigPath(String felixConfigPath);
-
-    /**
-     * Get the path of the config.properties file used by Felix.
-     * @return The path of the config.properties file used by Felix.
-     */
-    String getFelixConfigPath();
+    String getConfFolderPath();
 }

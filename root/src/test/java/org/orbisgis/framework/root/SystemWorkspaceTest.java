@@ -72,13 +72,10 @@ public class SystemWorkspaceTest {
         assertEquals(path + File.separator + "app", systemWorkspace.getApplicationFolderPath());
         assertEquals(path + File.separator + "bundle", systemWorkspace.getBundleFolderPath());
         assertEquals(path + File.separator + "cache", systemWorkspace.getCacheFolderPath());
-        assertNull(systemWorkspace.getFelixConfigPath());
         assertEquals(path + File.separator + "orbisgis.log", systemWorkspace.getLogFilePath());
         assertEquals(path + File.separator + "tmp", systemWorkspace.getTempFolderPath());
+        assertEquals(path + File.separator + "conf", systemWorkspace.getConfFolderPath());
         assertEquals(path, systemWorkspace.getWorkspaceFolderPath());
-
-        systemWorkspace.setFelixConfigPath(path + File.separator + "config.properties");
-        assertEquals(path + File.separator + "config.properties", systemWorkspace.getFelixConfigPath());
     }
 
     @Test

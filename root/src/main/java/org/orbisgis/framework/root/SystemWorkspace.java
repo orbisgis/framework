@@ -48,9 +48,6 @@ import java.io.File;
  */
 public class SystemWorkspace implements ISystemWorkspace {
 
-    /** Path of the config.properties file to give to Felix.*/
-    private String felixConfigPath;
-
     /** OrbisGIS major version.*/
     private final int versionMajor;
     /** OrbisGIS minor version.*/
@@ -64,6 +61,7 @@ public class SystemWorkspace implements ISystemWorkspace {
     private static final String APPLICATION_FOLDER_NAME = "app";
     private static final String BUNDLE_FOLDER_NAME = "bundle";
     private static final String CACHE_FOLDER_NAME = "cache";
+    private static final String CONF_FOLDER_NAME = "conf";
     private static final String LOG_FILE_NAME = "orbisgis.log";
 
     /**
@@ -124,6 +122,7 @@ public class SystemWorkspace implements ISystemWorkspace {
         success &= createFolder(new File(getTempFolderPath()), TEMP_FOLDER_NAME);
         success &= createFolder(new File(getApplicationFolderPath()), APPLICATION_FOLDER_NAME);
         success &= createFolder(new File(getBundleFolderPath()), BUNDLE_FOLDER_NAME);
+        success &= createFolder(new File(getConfFolderPath()), CONF_FOLDER_NAME);
         success &= createFolder(new File(getCacheFolderPath()), CACHE_FOLDER_NAME);
         if(success){
             logger.log(Logger.LOG_DEBUG, "Workspace '" + getWorkspaceFolderPath() + "' successfully loaded");
@@ -172,15 +171,7 @@ public class SystemWorkspace implements ISystemWorkspace {
     }
 
     @Override
-    public void setFelixConfigPath(String felixConfigPath) {
-        this.felixConfigPath = felixConfigPath;
-    }
-
-    @Override
-    public String getFelixConfigPath() {
-        if(felixConfigPath == null && workspacePath != null && new File(workspacePath, "config.properties").exists()){
-            setFelixConfigPath(new File(workspacePath, "config.properties").getAbsolutePath());
-        }
-        return felixConfigPath;
+    public String getConfFolderPath() {
+        return workspacePath + File.separator + CONF_FOLDER_NAME;
     }
 }

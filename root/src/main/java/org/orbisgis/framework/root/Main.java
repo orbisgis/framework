@@ -73,8 +73,8 @@ public class Main {
 
     private static final Logger LOGGER = new Logger();
     private static final String OBR_REPOSITORY_URL = "obr.repository.url";
-
     private static final String OBR_REPOSITORY_SNAPSHOT_URL = "obr.repository.snapshot.url";
+    private static final String MIN_ARCHETYPE = "minArchetype.properties";
     private static final Version VERSION = new Version(6, 0, 0, "SNAPSHOT");
 
     private static final int[] SUPPORTED_JAVA_VERSION = {8, 9, 10, 11};
@@ -104,8 +104,8 @@ public class Main {
      */
     private static void startFelix() {
         // Sets the system properties.
-        if(systemWorkspace.getFelixConfigPath() != null) {
-            System.setProperty("felix.config.properties", "file:" + systemWorkspace.getFelixConfigPath());
+        if(systemWorkspace.getConfFolderPath() != null) {
+            System.setProperty("felix.config.properties", "file:" + systemWorkspace.getConfFolderPath() + "config.properties");
         }
         // Load system properties.
         org.apache.felix.main.Main.loadSystemProperties();
@@ -167,8 +167,8 @@ public class Main {
             // Register the ISystemWorkspace
             m_fwk.getBundleContext().registerService(ISystemWorkspace.class, systemWorkspace, null);
             // Write the minimum archetype in the workspace
-            File archFile = new File(systemWorkspace.getWorkspaceFolderPath(), "minArchetype.properties");
-            InputStream inStream = Main.class.getResourceAsStream("minArchetype.properties");
+            File archFile = new File(systemWorkspace.getWorkspaceFolderPath(), MIN_ARCHETYPE);
+            InputStream inStream = Main.class.getResourceAsStream(MIN_ARCHETYPE);
             java.nio.file.Files.copy(inStream, archFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             inStream.close();
             ArchetypeLoader.loadArchetype(systemWorkspace, m_fwk.getBundleContext(), archFile.getAbsolutePath(), LOGGER);
@@ -188,7 +188,6 @@ public class Main {
             LOGGER.log(Logger.LOG_DEBUG, "Stop Felix framework");
             // Otherwise, exit.
             LOGGER.log(Logger.LOG_DEBUG, "Exit");
-            return;
         } catch (Exception ex) {
             showError("Could not create framework.\n"+ex.getLocalizedMessage(), true);
         }
@@ -341,22 +340,31 @@ public class Main {
             showError("Error get while loading the workspace", true);
         }
         //Check the --configProperties argument
+        InputStream inStream = null;
         if(line.hasOption("configProperties")){
-            String path = line.getOptionValue("configProperties");
-            systemWorkspace.setFelixConfigPath(path);
-        }
-        else if(systemWorkspace.getFelixConfigPath()==null){
-            try{
-                LOGGER.log(Logger.LOG_DEBUG, "Use default Felix config file.");
-                File confFile = new File(systemWorkspace.getWorkspaceFolderPath(), "config.properties");
-                InputStream inStream = Main.class.getResourceAsStream("config.properties");
-                Files.copy(inStream, confFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                inStream.close();
-                systemWorkspace.setFelixConfigPath(confFile.getAbsolutePath());
-            } catch (IOException e) {
-                String message = "Error while loading the default Felix config file : "+e.getLocalizedMessage();
-                showError(message, true);
+            File file = new File(line.getOptionValue("configProperties"));
+            if(!file.exists()){
+                LOGGER.log(Logger.LOG_DEBUG, "File '"+file+"' not found");
             }
+            else {
+                try {
+                    inStream = new FileInputStream(new File(line.getOptionValue("configProperties")));
+                } catch (FileNotFoundException e) {
+                    LOGGER.log(Logger.LOG_DEBUG, "File '"+file+"' not readable");
+                }
+            }
+        }
+        if(inStream == null){
+            LOGGER.log(Logger.LOG_DEBUG, "Use default Felix config file.");
+            inStream = Main.class.getResourceAsStream("config.properties");
+        }
+        try{
+            File confFile = new File(systemWorkspace.getConfFolderPath(), "config.properties");
+            Files.copy(inStream, confFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            inStream.close();
+        } catch (IOException e) {
+            String message = "Error while loading the default Felix config file : "+e.getLocalizedMessage();
+            showError(message, true);
         }
         return true;
     }

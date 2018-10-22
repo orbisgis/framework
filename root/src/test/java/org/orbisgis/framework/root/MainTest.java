@@ -214,8 +214,8 @@ class MainTest {
         Object obj = field.get(main);
         assertTrue(obj instanceof SystemWorkspace);
         SystemWorkspace workspace = (SystemWorkspace) obj;
-        assertEquals(new File(workspace.getWorkspaceFolderPath(), "config.properties").getAbsolutePath(),
-                workspace.getFelixConfigPath());
+        assertEquals(new File(workspace.getWorkspaceFolderPath(), "conf").getAbsolutePath(),
+                workspace.getConfFolderPath());
 
         File file = new File(Main.class.getResource("config.properties").toURI());
         main = new Main();
@@ -227,7 +227,7 @@ class MainTest {
         obj = field.get(main);
         assertTrue(obj instanceof SystemWorkspace);
         workspace = (SystemWorkspace) obj;
-        assertEquals(file.getAbsolutePath(), workspace.getFelixConfigPath());
+        assertEquals(new File(workspace.getWorkspaceFolderPath(), "conf").getAbsolutePath(), workspace.getConfFolderPath());
     }
 
     @Test
