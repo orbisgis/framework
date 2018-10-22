@@ -20,9 +20,9 @@ The following arguments are available  :
 The second step configure the `SystemWorkspace` in order to start the application.
 In the workspace path set with the argument `workspace` which can be cleared with the argument `noFail`,
 the `ArchetypeLoader` download all the bundle specified if the archetype to use.
-By default, if the argument `noUI` has been set, the archetype `minArchetype` is loaded.
+By default, if the argument `noUI` has been set, the archetype `minArchetype` is loaded and disable the `GUI` bundles.
 
 ### Start
 
 Once the `SystemWorkspace` configured and ready, the downloaded bundles are installed in the OSGI framework and started.
-The frameword used if Apache Felix if the argument `noUI` is set, oftherwise  Drombler framework is used.
+The frameword used is Apache Felix.
