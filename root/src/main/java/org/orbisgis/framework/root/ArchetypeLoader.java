@@ -36,6 +36,7 @@
  */
 package org.orbisgis.framework.root;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.felix.framework.Logger;
 import org.osgi.framework.BundleContext;
@@ -100,13 +101,22 @@ public class ArchetypeLoader {
         //Download all the bundle which are not in the coreworkspace bundle folder.
         for(Iterator<Map.Entry<String, String>> it = bundleNameSourceMap.entrySet().iterator(); it.hasNext();){
             Map.Entry<String, String> entry = it.next();
-            File bundleFile = new File(coreWorkspace.getBundleFolderPath()+File.separator+entry.getKey());
-            if(bundleFile.exists()){
+            URL url;
+            try {
+                url = new URL(entry.getKey());
+            } catch (MalformedURLException e) {
+                logger.log(Logger.LOG_WARNING, "Cannot open the URL :"+entry.getKey());
+                it.remove();
+                continue;
+            }
+            String fileName = FilenameUtils.getName(url.getPath());
+            File bundleFile = new File(coreWorkspace.getBundleFolderPath(), fileName);
+            if(bundleFile.exists() && url.getQuery() == null){
                 logger.log(Logger.LOG_DEBUG, "Bundle '"+entry.getKey()+"' is already in bundle folder.");
                 it.remove();
             }
             else{
-                if(!downloadBundle(entry.getValue(), entry.getKey(), logger)){
+                if(!downloadBundle(entry.getValue(), url, logger)){
                     it.remove();
                 }
             }
@@ -114,50 +124,60 @@ public class ArchetypeLoader {
 
         if (bundleContext != null) {
             //Launch All the bundle in not already present
-            bundleNameSourceMap.forEach((key, value) -> {
+            for(File file : new File(coreWorkspace.getBundleFolderPath()).listFiles()){
                 URL url;
                 try {
-                    url = new URL(key);
+                    url = file.toURL();
                 } catch (MalformedURLException e) {
-                    logger.log(Logger.LOG_WARNING, "Cannot open the URL :"+key);
+                    logger.log(Logger.LOG_WARNING, "Cannot open the URL :"+file);
                     return;
                 }
                 String fileName = FilenameUtils.getName(url.getPath());
-                if (isBundleInCache(key, value, bundleContext)) {
+                if (isBundleInCache(url, coreWorkspace.getBundleFolderPath(), bundleContext)) {
                     logger.log(Logger.LOG_DEBUG, "The bundle '" + fileName + "' is already installed");
                 }
                 else{
                     try {
                         logger.log(Logger.LOG_DEBUG, "Installing bundle '" + fileName + "'");
-                        bundleContext.installBundle(fileName, new FileInputStream(new File(value, fileName)));
+                        bundleContext.installBundle(fileName, url.openStream());
                         bundleContext.getBundle(fileName).start();
                         logger.log(Logger.LOG_DEBUG, "The bundle '" + fileName + "' has been installed");
                     } catch (BundleException e) {
                         logger.log(Logger.LOG_ERROR, "An error occurred while installing the bundle '" + fileName + "'");
                     } catch (FileNotFoundException e) {
                         logger.log(Logger.LOG_ERROR, "An error occurred while finding the file '" + fileName + "'");
+                    } catch (IOException e) {
+                        logger.log(Logger.LOG_ERROR, "An error occurred while reading the file '" + fileName + "'");
                     }
                 }
-            });
+            }
         }
     }
 
-    private static boolean downloadBundle(String bundleFolder, String source, Logger logger){
-        URL url;
-        try {
-            url = new URL(source);
-        } catch (MalformedURLException e) {
-            logger.log(Logger.LOG_WARNING, "Cannot open the URL :"+source);
+    private static boolean downloadBundle(String bundleFolder, URL url, Logger logger){
+
+        String fileName;
+        String query = url.getQuery();
+        if(query == null){
+            fileName = FilenameUtils.getName(url.getPath());
+        }
+        else if(query.contains("a=")){
+            fileName = query.substring(query.indexOf("a=")+2);
+            if(fileName.contains("&")) {
+                fileName = fileName.substring(0, fileName.indexOf("&"));
+            }
+        }
+        else{
+            logger.log(Logger.LOG_DEBUG, "Unable to downloading the bundle '"+url+"'");
             return false;
         }
-        String fileName = FilenameUtils.getName(url.getPath());
-        logger.log(Logger.LOG_DEBUG, "Downloading the bundle '"+source+"'");
+        logger.log(Logger.LOG_DEBUG, "Downloading the bundle '"+url+"'");
 
         InputStream inputStream;
         try {
-            inputStream = new URL(source).openStream();
+            inputStream = url.openStream();
         } catch (IOException e) {
-            logger.log(Logger.LOG_WARNING, "Cannot open the URL :"+source);
+            logger.log(Logger.LOG_WARNING, "Cannot open the URL :"+url);
             return false;
         }
         boolean result = true;
@@ -181,13 +201,7 @@ public class ArchetypeLoader {
         return result;
     }
 
-    private static boolean isBundleInCache(String source, String bundleFolder, BundleContext bundleContext){
-        URL url;
-        try {
-            url = new URL(source);
-        } catch (MalformedURLException e) {
-            return false;
-        }
+    private static boolean isBundleInCache(URL url, String bundleFolder, BundleContext bundleContext){
         String fileName = FilenameUtils.getName(url.getPath());
         try(JarFile jar = new JarFile(new File(bundleFolder, fileName))){
             Manifest manifest = jar.getManifest();
