@@ -39,7 +39,6 @@ package org.orbisgis.framework.root;
 import org.apache.commons.cli.*;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.main.AutoProcessor;
-import org.drombler.fx.startup.main.DromblerFXApplication;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.Version;
@@ -74,9 +73,8 @@ public class Main {
 
     private static final Logger LOGGER = new Logger();
     private static final String OBR_REPOSITORY_URL = "obr.repository.url";
-    private static final String NO_UI_ARCHETYPE = "minArchetype.properties";
-    private static final String UI_ARCHETYPE = "minArchetypeWithUI.properties";
     private static final String OBR_REPOSITORY_SNAPSHOT_URL = "obr.repository.snapshot.url";
+    private static final String MIN_ARCHETYPE = "minArchetype.properties";
     private static final Version VERSION = new Version(6, 0, 0, "SNAPSHOT");
 
     private static final int[] SUPPORTED_JAVA_VERSION = {8, 9, 10, 11};
@@ -96,36 +94,7 @@ public class Main {
                     "The supported version are : "+ Arrays.toString(SUPPORTED_JAVA_VERSION)+".";
             showError(message, true);
         }
-        if(NO_UI_MODE) {
-            startFelix();
-        }
-        else{
-            startDrombler();
-        }
-    }
-
-    /**
-     * Start the Drombler framework used for the generation of the UI.
-     */
-    private static void startDrombler(){
-        //First load the UI archetype
-        try {
-            File archFile = new File(systemWorkspace.getWorkspaceFolderPath(), UI_ARCHETYPE);
-            InputStream inStream = Main.class.getResourceAsStream(UI_ARCHETYPE);
-            java.nio.file.Files.copy(inStream, archFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            inStream.close();
-            ArchetypeLoader.loadArchetype(systemWorkspace, null, archFile.getAbsolutePath(), LOGGER);
-        }
-        catch(Exception e){
-            LOGGER.log(Logger.LOG_ERROR, "Unable to load the archetype '"+NO_UI_ARCHETYPE+"'.\n"+e.getLocalizedMessage());
-        }
-        //Launch the Drombler framework
-        try {
-            DromblerFXApplication.main("--installdir", systemWorkspace.getWorkspaceFolderPath(),
-                    "--userdir", systemWorkspace.getWorkspaceFolderPath());
-        } catch (Exception e) {
-            LOGGER.log(Logger.LOG_ERROR, "Unable to launch Drombler.\n"+e.getLocalizedMessage());
-        }
+        startFelix();
     }
 
     /**
@@ -136,7 +105,7 @@ public class Main {
     private static void startFelix() {
         // Sets the system properties.
         if(systemWorkspace.getConfFolderPath() != null) {
-            System.setProperty("felix.config.properties", "file:" + systemWorkspace.getConfFolderPath());
+            System.setProperty("felix.config.properties", "file:" + systemWorkspace.getConfFolderPath() + "config.properties");
         }
         // Load system properties.
         org.apache.felix.main.Main.loadSystemProperties();
@@ -198,8 +167,8 @@ public class Main {
             // Register the ISystemWorkspace
             m_fwk.getBundleContext().registerService(ISystemWorkspace.class, systemWorkspace, null);
             // Write the minimum archetype in the workspace
-            File archFile = new File(systemWorkspace.getWorkspaceFolderPath(), NO_UI_ARCHETYPE);
-            InputStream inStream = Main.class.getResourceAsStream(NO_UI_ARCHETYPE);
+            File archFile = new File(systemWorkspace.getWorkspaceFolderPath(), MIN_ARCHETYPE);
+            InputStream inStream = Main.class.getResourceAsStream(MIN_ARCHETYPE);
             java.nio.file.Files.copy(inStream, archFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             inStream.close();
             ArchetypeLoader.loadArchetype(systemWorkspace, m_fwk.getBundleContext(), archFile.getAbsolutePath(), LOGGER);
