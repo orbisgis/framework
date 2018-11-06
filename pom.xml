@@ -17,6 +17,8 @@
         <module>root</module>
         <module>bundle-manager-api</module>
         <module>bundle-manager</module>
+        <module>workspace-api</module>
+        <module>workspace</module>
         <module>dist</module>
     </modules>
     <properties>
