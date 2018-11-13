@@ -7,12 +7,30 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <artifactId>workspace</artifactId>
-    <packaging>pom</packaging>
+    <packaging>bundle</packaging>
     <dependencies>        
         <dependency>
             <groupId>org.orbisgis</groupId>
             <artifactId>workspace-api</artifactId>
             <version>${parent.version}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
         </dependency>
     </dependencies>
+    <!-- Build Settings -->
+    <build>
+        <plugins>
+            <!-- Compilation -->
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>                
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

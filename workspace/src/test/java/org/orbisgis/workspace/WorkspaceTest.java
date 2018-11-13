@@ -36,50 +36,19 @@
  */
 package org.orbisgis.workspace;
 
-import java.io.File;
-import org.orbisgis.workspaceapi.IWorkspace;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+
 
 /**
- * Implementation for Workspace API.
- * 
- * A Workspace is  directory that contains files or sub directories to store
- * all data required by the bundle(s)
- * 
- * @author Sylvain PALOMINOS (UBS 2018)
  * @author Erwan Bocher (CNRS)
+ * @author Sylvain PALOMINOS (UBS 2018)
  */
-public class Workspace implements IWorkspace {
-
-    private final File path;
+public class WorkspaceTest {
     
-    /**
-     * Create a default tmp directory 
-     */
-    public Workspace() {
-        this(System.getProperty("java.io.tmpdir") + File.separator + "OrbisGIS");
+    @Test
+    public void testCreateDefaultWorkspace(){
+        Workspace w = new Workspace();
+        assertTrue(w.getPath()!=null);        
     }
-
-    /**
-     * Create a new directory or use the existing one
-     *
-     * @param path
-     */
-    public Workspace(String path) {
-        this.path = new File(path);
-        if (this.path.isDirectory()) {
-            if (this.path.exists()) {                
-            } else {
-                this.path.mkdir();
-            }
-        } else {
-            throw new IllegalArgumentException("Invalid directory path");
-        }
-
-    }
-
-    @Override
-    public File getPath() {
-        return path;
-    }
-
 }
