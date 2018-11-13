@@ -36,8 +36,13 @@
  */
 package org.orbisgis.workspace;
 
+import java.io.File;
+import java.io.IOException;
+import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 
 /**
@@ -47,8 +52,47 @@ import org.junit.jupiter.api.Test;
 public class WorkspaceTest {
     
     @Test
-    public void testCreateDefaultWorkspace(){
+    public void testCreateDefaultWorkspace() {
         Workspace w = new Workspace();
-        assertTrue(w.getPath()!=null);        
+        assertTrue(w.getPath() != null);
+    }
+
+    @Test
+    public void testCreateWorkspace() {
+        File wp = new File("target/myWorkspace");
+        Workspace w = new Workspace(wp.getAbsolutePath());
+        assertEquals(wp.getAbsolutePath(), w.getPath().getAbsolutePath());
+    }
+
+    @Test
+    public void testReCreateWorkspace() {
+        File wp = new File("target/myWorkspace");
+        Workspace w = new Workspace(wp.getAbsolutePath());
+        assertEquals(wp.getAbsolutePath(), w.getPath().getAbsolutePath());
+        w = new Workspace(wp.getAbsolutePath());
+        assertEquals(wp.getAbsolutePath(), w.getPath().getAbsolutePath());
+    }
+    
+    @Test
+    public void testBadWorkspace() throws IOException {
+        File wp = new File("target/myWorkspace.txt");        
+        wp.createNewFile();
+        Executable error = ()-> new Workspace(wp.getAbsolutePath());
+        Assertions.assertThrows(IllegalArgumentException.class,error);
+    }
+    
+    @Test
+    public void testWorkspaceExists() throws IOException {
+        File wp = new File("target/myWorkspace");        
+        wp.delete();
+        wp.mkdir();
+        Workspace w = new Workspace(wp.getAbsolutePath());
+        assertEquals(wp.getAbsolutePath(), w.getPath().getAbsolutePath());
+    }
+    
+    @Test
+    public void testWorkspaceEmpty() throws IOException {
+        Executable error = ()-> new Workspace("");
+        Assertions.assertThrows(IllegalArgumentException.class,error);
     }
 }

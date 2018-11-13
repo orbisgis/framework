@@ -64,17 +64,19 @@ public class Workspace implements IWorkspace {
      *
      * @param path
      */
-    public Workspace(String path) {
-        this.path = new File(path);
-        if (this.path.isDirectory()) {
-            if (this.path.exists()) {                
+    public Workspace(String path) throws IllegalArgumentException {
+        if (!path.isEmpty()) {
+            this.path = new File(path);
+            if (this.path.exists()) {
+                if (!this.path.isDirectory()) {
+                    throw new IllegalArgumentException("Invalid directory path");
+                }
             } else {
                 this.path.mkdir();
             }
         } else {
-            throw new IllegalArgumentException("Invalid directory path");
+            throw new IllegalArgumentException("The directory cannot be empty");
         }
-
     }
 
     @Override

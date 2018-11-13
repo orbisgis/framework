@@ -1,5 +1,5 @@
 /*
- * Framework is part of the OrbisGIS platform
+ * Root is part of the OrbisGIS platform
  *
  * OrbisGIS is a java GIS application dedicated to research in GIScience.
  * OrbisGIS is developed by the GIS group of the DECIDE team of the
@@ -13,22 +13,22 @@
  * Institut Universitaire de Technologie de Vannes
  * 8, Rue Montaigne - BP 561 56017 Vannes Cedex
  *
- * OrbisWPS is distributed under GPL 3 license.
+ * Root is distributed under GPL 3 license.
  *
  * Copyright (C) 2018 CNRS (Lab-STICC UMR CNRS 6285)
  *
  *
- * OrbisWPS is free software: you can redistribute it and/or modify it under the
+ * Root is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later
  * version.
  *
- * OrbisWPS is distributed in the hope that it will be useful, but WITHOUT ANY
+ * Root is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * OrbisWPS. If not, see <http://www.gnu.org/licenses/>.
+ * Root. If not, see <http://www.gnu.org/licenses/>.
  *
  * For more information, please consult: <http://www.orbisgis.org/>
  * or contact directly:
@@ -48,9 +48,6 @@ import java.io.File;
  */
 public class SystemWorkspace implements ISystemWorkspace {
 
-    /** Path of the config.properties file to give to Felix.*/
-    private String felixConfigPath;
-
     /** OrbisGIS major version.*/
     private final int versionMajor;
     /** OrbisGIS minor version.*/
@@ -64,6 +61,7 @@ public class SystemWorkspace implements ISystemWorkspace {
     private static final String APPLICATION_FOLDER_NAME = "app";
     private static final String BUNDLE_FOLDER_NAME = "bundle";
     private static final String CACHE_FOLDER_NAME = "cache";
+    private static final String CONF_FOLDER_NAME = "conf";
     private static final String LOG_FILE_NAME = "orbisgis.log";
 
     /**
@@ -124,6 +122,7 @@ public class SystemWorkspace implements ISystemWorkspace {
         success &= createFolder(new File(getTempFolderPath()), TEMP_FOLDER_NAME);
         success &= createFolder(new File(getApplicationFolderPath()), APPLICATION_FOLDER_NAME);
         success &= createFolder(new File(getBundleFolderPath()), BUNDLE_FOLDER_NAME);
+        success &= createFolder(new File(getConfFolderPath()), CONF_FOLDER_NAME);
         success &= createFolder(new File(getCacheFolderPath()), CACHE_FOLDER_NAME);
         if(success){
             logger.log(Logger.LOG_DEBUG, "Workspace '" + getWorkspaceFolderPath() + "' successfully loaded");
@@ -172,15 +171,7 @@ public class SystemWorkspace implements ISystemWorkspace {
     }
 
     @Override
-    public void setFelixConfigPath(String felixConfigPath) {
-        this.felixConfigPath = felixConfigPath;
-    }
-
-    @Override
-    public String getFelixConfigPath() {
-        if(felixConfigPath == null && workspacePath != null && new File(workspacePath, "config.properties").exists()){
-            setFelixConfigPath(new File(workspacePath, "config.properties").getAbsolutePath());
-        }
-        return felixConfigPath;
+    public String getConfFolderPath() {
+        return workspacePath + File.separator + CONF_FOLDER_NAME;
     }
 }

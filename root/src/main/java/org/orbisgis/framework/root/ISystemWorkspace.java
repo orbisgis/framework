@@ -13,22 +13,22 @@
  * Institut Universitaire de Technologie de Vannes
  * 8, Rue Montaigne - BP 561 56017 Vannes Cedex
  *
- * OrbisWPS is distributed under GPL 3 license.
+ * Root is distributed under GPL 3 license.
  *
  * Copyright (C) 2018 CNRS (Lab-STICC UMR CNRS 6285)
  *
  *
- * OrbisWPS is free software: you can redistribute it and/or modify it under the
+ * Root is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later
  * version.
  *
- * OrbisWPS is distributed in the hope that it will be useful, but WITHOUT ANY
+ * Root is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * OrbisWPS. If not, see <http://www.gnu.org/licenses/>.
+ * Root. If not, see <http://www.gnu.org/licenses/>.
  *
  * For more information, please consult: <http://www.orbisgis.org/>
  * or contact directly:
@@ -97,15 +97,8 @@ public interface ISystemWorkspace {
     String getLogFilePath();
 
     /**
-     * Set the path of the config.properties file used by Felix.
-     *
-     * @param felixConfigPath The path of the config.properties file used by Felix.
+     * Get the path of the configuration files used by Felix.
+     * @return The path of the configuration files used by Felix.
      */
-    void setFelixConfigPath(String felixConfigPath);
-
-    /**
-     * Get the path of the config.properties file used by Felix.
-     * @return The path of the config.properties file used by Felix.
-     */
-    String getFelixConfigPath();
+    String getConfFolderPath();
 }
