@@ -234,7 +234,7 @@ public class Main {
             JOptionPane.showMessageDialog(null, message);
         }
         if(exitOnClose && !TEST_MODE) {
-            System.exit(0);
+            //System.exit(0);
         }
     }
 
