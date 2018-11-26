@@ -139,4 +139,12 @@ public interface IBundleUtils {
      * @return True if the bundle has been uninstalled, false otherwise.
      */
     boolean uninstall(String groupId, String artifactId);
+
+    /**
+     * Adds an OBR repository.
+     *
+     * @param name Name of the repository.
+     * @param url Url of the repository.
+     */
+    void addObrRepository(String name, String url);
 }

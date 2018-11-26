@@ -46,6 +46,9 @@ import org.osgi.service.obr.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * Implementation of the interface {@link org.orbisgis.bundlemanagerapi.IBundleUtils} interface with the OSGI framework.
  *
@@ -79,7 +82,7 @@ public class BundleUtils implements IBundleUtils {
 
     @Override
     public boolean install(String groupId, String artifactId){
-        LOGGER.debug("Trying to install bundle '"+groupId+"."+artifactId+"'");
+        LOGGER.debug("Trying to install bundle '"+groupId+"."+artifactId+"' from OBR repositories");
         for(Repository repository : repositoryAdmin.listRepositories()){
             for(Resource resource : repository.getResources()){
                 if(resource.getSymbolicName().equals(groupId+"."+artifactId)) {
@@ -96,6 +99,8 @@ public class BundleUtils implements IBundleUtils {
                 }
             }
         }
+        LOGGER.debug("Trying to install bundle '"+groupId+"."+artifactId+"' from Maven repositories");
+
         return false;
     }
 
@@ -249,6 +254,17 @@ public class BundleUtils implements IBundleUtils {
             }
         }
         return false;
+    }
+
+    @Override
+    public void addObrRepository(String name, String url) {
+        try {
+            repositoryAdmin.addRepository(new URL(url));
+        } catch (MalformedURLException e) {
+            LOGGER.error("Unable to generate the URL '"+url+"'");
+        } catch (Exception e) {
+            LOGGER.error("Unable to add the repository '"+url+"'");
+        }
     }
 
     /**
