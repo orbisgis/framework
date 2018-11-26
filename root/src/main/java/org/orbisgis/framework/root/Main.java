@@ -75,6 +75,7 @@ public class Main {
     private static final String OBR_REPOSITORY_URL = "obr.repository.url";
     private static final String OBR_REPOSITORY_SNAPSHOT_URL = "obr.repository.snapshot.url";
     private static final String MIN_ARCHETYPE = "minArchetype.properties";
+    private static final String UI_ARCHETYPE = "uiArchetype.properties";
     private static final Version VERSION = new Version(6, 0, 0, "SNAPSHOT");
 
     private static final int[] SUPPORTED_JAVA_VERSION = {8, 9, 10, 11};
@@ -166,9 +167,16 @@ public class Main {
             AutoProcessor.process(configProps, m_fwk.getBundleContext());
             // Register the ISystemWorkspace
             m_fwk.getBundleContext().registerService(ISystemWorkspace.class, systemWorkspace, null);
-            // Write the minimum archetype in the workspace
-            File archFile = new File(systemWorkspace.getWorkspaceFolderPath(), MIN_ARCHETYPE);
-            InputStream inStream = Main.class.getResourceAsStream(MIN_ARCHETYPE);
+            // Write the archetype in the workspace
+            String archetype;
+            if(NO_UI_MODE) {
+                archetype = MIN_ARCHETYPE;
+            }
+            else {
+                archetype = UI_ARCHETYPE;
+            }
+            File archFile = new File(systemWorkspace.getWorkspaceFolderPath(), archetype);
+            InputStream inStream = Main.class.getResourceAsStream(archetype);
             java.nio.file.Files.copy(inStream, archFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             inStream.close();
             ArchetypeLoader.loadArchetype(systemWorkspace, m_fwk.getBundleContext(), archFile.getAbsolutePath(), LOGGER);
@@ -234,7 +242,7 @@ public class Main {
             JOptionPane.showMessageDialog(null, message);
         }
         if(exitOnClose && !TEST_MODE) {
-            //System.exit(0);
+            System.exit(0);
         }
     }
 
