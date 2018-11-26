@@ -99,8 +99,6 @@ public class BundleUtils implements IBundleUtils {
                 }
             }
         }
-        LOGGER.debug("Trying to install bundle '"+groupId+"."+artifactId+"' from Maven repositories");
-
         return false;
     }
 
