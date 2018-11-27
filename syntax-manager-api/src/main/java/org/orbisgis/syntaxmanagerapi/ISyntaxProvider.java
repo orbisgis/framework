@@ -1,5 +1,7 @@
 package org.orbisgis.syntaxmanagerapi;
 
+import java.util.Collection;
+
 /**
  * Container grouping a collection of ISyntaxObject which can be register into a ISyntaxProviderManager in order to
  * expose the ISyntaxObject in other bundles.
@@ -25,4 +27,11 @@ public interface ISyntaxProvider {
      * @param syntaxObject ISyntaxObject to remove.
      */
     void removeSyntaxObject(ISyntaxObject syntaxObject);
+
+    /**
+     * Return the Collection of ISyntaxObject.
+     *
+     * @return The collection of ISyntaxObject.
+     */
+    Collection<ISyntaxObject> getISyntaxObjectCollection();
 }

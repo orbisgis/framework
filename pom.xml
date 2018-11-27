@@ -16,6 +16,7 @@
     <modules>
         <module>root</module>
         <module>syntax-manager-api</module>
+        <module>syntax-manager</module>
         <module>bundle-manager-api</module>
         <module>bundle-manager</module>
         <module>workspace-api</module>
@@ -89,6 +90,18 @@
                 <artifactId>system-rules</artifactId>
                 <version>1.18.0</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+                <version>1.2.4</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.compendium</artifactId>
+                <version>4.3.1</version>
+                <scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -1,5 +1,7 @@
 package org.orbisgis.syntaxmanagerapi;
 
+import java.util.List;
+
 /**
  * Manages the ISyntaxProvider in order to make the available to all the other bundles.
  *
@@ -25,4 +27,11 @@ public interface ISyntaxProviderManager {
      * @param syntaxProvider ISyntaxProvider to unregister.
      */
     void unregisterSyntaxProvider(ISyntaxProvider syntaxProvider);
+
+    /**
+     * Return the ISyntaxProvider list.
+     *
+     * @return The ISyntaxProvider list.
+     */
+    List<ISyntaxProvider> getSyntaxProviderList();
 }
