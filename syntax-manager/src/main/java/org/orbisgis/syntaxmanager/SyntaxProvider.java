@@ -2,6 +2,7 @@ package org.orbisgis.syntaxmanager;
 
 import org.orbisgis.syntaxmanagerapi.ISyntaxObject;
 import org.orbisgis.syntaxmanagerapi.ISyntaxProvider;
+import org.osgi.service.component.annotations.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +15,19 @@ import java.util.Collection;
  */
 public class SyntaxProvider implements ISyntaxProvider {
 
-    Collection<ISyntaxObject> collection = new ArrayList<>();
+    /** ISyntaxObject collection */
+    private Collection<ISyntaxObject> collection = new ArrayList<>();
+    /** Name of the SyntaxProvider */
+    private String name;
+
+    /**
+     * Main constructor.
+     *
+     * @param name Name of the SyntaxProvider.
+     */
+    public SyntaxProvider(String name){
+        this.name = name;
+    }
 
     @Override
     public void addSyntaxObject(ISyntaxObject syntaxObject){
@@ -29,5 +42,10 @@ public class SyntaxProvider implements ISyntaxProvider {
     @Override
     public Collection<ISyntaxObject> getISyntaxObjectCollection(){
         return collection;
+    }
+
+    @Override
+    public String getName(){
+        return name;
     }
 }

@@ -34,4 +34,11 @@ public interface ISyntaxProvider {
      * @return The collection of ISyntaxObject.
      */
     Collection<ISyntaxObject> getISyntaxObjectCollection();
+
+    /**
+     * Return the name of the ISyntaxProvider.
+     *
+     * @return The name of the ISyntaxProvider.
+     */
+    String getName();
 }
