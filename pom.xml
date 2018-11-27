@@ -15,6 +15,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>root</module>
+        <module>syntax-manager-api</module>
         <module>bundle-manager-api</module>
         <module>bundle-manager</module>
         <module>workspace-api</module>
