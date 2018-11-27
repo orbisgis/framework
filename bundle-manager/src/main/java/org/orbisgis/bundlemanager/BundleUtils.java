@@ -256,6 +256,9 @@ public class BundleUtils implements IBundleUtils {
 
     @Override
     public void addObrRepository(String name, String url) {
+        if(!url.endsWith("obr.xml")){
+            LOGGER.warn("The URL '" + url + "' doesn't seems to be a valid OBR repository");
+        }
         try {
             repositoryAdmin.addRepository(new URL(url));
         } catch (MalformedURLException e) {
