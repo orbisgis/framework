@@ -8,6 +8,12 @@ import org.orbisgis.syntaxmanagerapi.ISyntaxProvider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+/**
+ * Extension of the SyntaxProvider class which register the BundleUtils component under the name 'bundle'.
+ *
+ * @author Sylvain PALOMINOS (UBS 2018)
+ * @author Erwan Bocher (CNRS)
+ */
 @Component(immediate = true, service = {ISyntaxProvider.class})
 public class BundleSyntaxProvider extends SyntaxProvider {
 
