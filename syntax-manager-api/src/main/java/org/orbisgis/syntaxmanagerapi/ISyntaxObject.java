@@ -37,8 +37,8 @@
 package org.orbisgis.syntaxmanagerapi;
 
 /**
- * A SyntaxObject represents a Object with its name. This Object can be exposed to other bundle after being registered
- * into a SyntaxProvider.
+ * A SyntaxObject represents a Object with its variable name. This Object can be exposed to other bundle after being
+ * registered into a SyntaxProvider.
  *
  * The main usage is to give to language consoles (like Groovy console) predefined properties to access easily to
  * bundle classes/utils/services
