@@ -1,12 +1,14 @@
 package org.orbisgis.bundlemanager;
 
 import org.orbisgis.bundlemanagerapi.IBundleUtils;
-import org.orbisgis.syntaxmanager.SyntaxObject;
-import org.orbisgis.syntaxmanager.SyntaxProvider;
 import org.orbisgis.syntaxmanagerapi.ISyntaxObject;
 import org.orbisgis.syntaxmanagerapi.ISyntaxProvider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Extension of the SyntaxProvider class which register the BundleUtils component under the name 'bundle'.
@@ -15,13 +17,31 @@ import org.osgi.service.component.annotations.Reference;
  * @author Erwan Bocher (CNRS)
  */
 @Component(immediate = true, service = {ISyntaxProvider.class})
-public class BundleSyntaxProvider extends SyntaxProvider {
+public class BundleSyntaxProvider implements ISyntaxProvider {
 
-    /**
-     * Main constructor
-     */
-    public BundleSyntaxProvider() {
-        super("BundleSyntaxProvider");
+    /** SyntaxProvider name */
+    private static final String NAME = "BundleSyntaxProvider";
+
+    private List<ISyntaxObject> syntaxObjectList = new ArrayList<>();
+
+    @Override
+    public void add(ISyntaxObject syntaxObject) {
+        syntaxObjectList.add(syntaxObject);
+    }
+
+    @Override
+    public void remove(ISyntaxObject syntaxObject) {
+        syntaxObjectList.remove(syntaxObject);
+    }
+
+    @Override
+    public Collection<ISyntaxObject> getISyntaxObjectCollection() {
+        return syntaxObjectList;
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
     /**
@@ -31,8 +51,9 @@ public class BundleSyntaxProvider extends SyntaxProvider {
      */
     @Reference
     public void setIBundleUtils(IBundleUtils bundleUtils) {
-        ISyntaxObject syntaxObject = new SyntaxObject("bundle", bundleUtils);
-        this.addSyntaxObject(syntaxObject);
+        if(bundleUtils instanceof ISyntaxObject) {
+            this.add((ISyntaxObject) bundleUtils);
+        }
     }
 
     /**
@@ -41,14 +62,8 @@ public class BundleSyntaxProvider extends SyntaxProvider {
      * @param bundleUtils IBundleUtils unset.
      */
     public void unsetIBundleUtils(IBundleUtils bundleUtils) {
-        ISyntaxObject syntaxObject = null;
-        for (ISyntaxObject so : getISyntaxObjectCollection()) {
-            if (so.getObject().equals(bundleUtils)) {
-                syntaxObject = so;
-            }
-        }
-        if(syntaxObject != null) {
-            this.removeSyntaxObject(syntaxObject);
+        if(bundleUtils instanceof ISyntaxObject) {
+            this.remove((ISyntaxObject) bundleUtils);
         }
     }
 }

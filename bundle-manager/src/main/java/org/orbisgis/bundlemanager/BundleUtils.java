@@ -37,6 +37,7 @@
 package org.orbisgis.bundlemanager;
 
 import org.orbisgis.bundlemanagerapi.IBundleUtils;
+import org.orbisgis.syntaxmanagerapi.ISyntaxObject;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -56,10 +57,12 @@ import java.net.URL;
  * @author Erwan Bocher (CNRS)
  */
 @Component(immediate=true, service = {IBundleUtils.class})
-public class BundleUtils implements IBundleUtils {
+public class BundleUtils implements IBundleUtils, ISyntaxObject {
 
     /** Logger */
     private static final Logger LOGGER = LoggerFactory.getLogger(BundleUtils.class);
+    /** SyntaxObject name */
+    private static final String NAME = "bundle";
     /** {@link org.osgi.service.obr.RepositoryAdmin} used for the bundle resolution. */
     private RepositoryAdmin repositoryAdmin;
 
@@ -286,5 +289,10 @@ public class BundleUtils implements IBundleUtils {
      */
     public void unsetRepositoryAdmin(RepositoryAdmin repositoryAdmin) {
         this.repositoryAdmin = null;
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 }

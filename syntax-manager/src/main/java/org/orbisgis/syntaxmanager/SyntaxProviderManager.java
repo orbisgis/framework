@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -17,18 +18,19 @@ import java.util.List;
  * @author Erwan Bocher (CNRS)
  */
 @Component(immediate = true, service = {ISyntaxProviderManager.class})
-public class SyntaxProviderManager implements ISyntaxProviderManager {
+public class SyntaxProviderManager implements ISyntaxProviderManager, ISyntaxObject {
 
-    private Logger LOGGER = LoggerFactory.getLogger(SyntaxProvider.class);
+    /** Name of the SyntaxObject */
+    private static final String NAME = "syntaxManager";
+    private static final Logger LOGGER = LoggerFactory.getLogger(SyntaxProviderManager.class);
 
     /** List of ISyntaxProvider */
     private List<ISyntaxProvider> syntaxProviderList = new ArrayList<>();
 
     @Activate
     public void activate(){
-        ISyntaxProvider syntaxProvider = new SyntaxProvider("Syntax Manager SyntaxProvider");
-        ISyntaxObject syntaxObject = new SyntaxObject("syntaxManager", this);
-        syntaxProvider.addSyntaxObject(syntaxObject);
+        SyntaxProvider syntaxProvider = new SyntaxProvider();
+        syntaxProvider.add(this);
         this.registerSyntaxProvider(syntaxProvider);
     }
 
@@ -48,5 +50,36 @@ public class SyntaxProviderManager implements ISyntaxProviderManager {
     @Override
     public List<ISyntaxProvider> getSyntaxProviderList(){
         return syntaxProviderList;
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
+    private class SyntaxProvider implements ISyntaxProvider {
+
+        private static final String NAME = "SyntaxManager Provider";
+        private List<ISyntaxObject> syntaxObjectList = new ArrayList<>();
+
+        @Override
+        public void add(ISyntaxObject syntaxObject) {
+            syntaxObjectList.add(syntaxObject);
+        }
+
+        @Override
+        public void remove(ISyntaxObject syntaxObject) {
+            syntaxObjectList.remove(syntaxObject);
+        }
+
+        @Override
+        public Collection<ISyntaxObject> getISyntaxObjectCollection() {
+            return syntaxObjectList;
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
     }
 }

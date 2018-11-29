@@ -54,11 +54,4 @@ public interface ISyntaxObject {
      * @return The name of the Object.
      */
     String getName();
-
-    /**
-     * Return the Object.
-     *
-     * @return The Object.
-     */
-    Object getObject();
 }

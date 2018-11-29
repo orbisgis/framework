@@ -19,14 +19,14 @@ public interface ISyntaxProvider {
      *
      * @param syntaxObject ISyntaxObject to add.
      */
-    void addSyntaxObject(ISyntaxObject syntaxObject);
+    void add(ISyntaxObject syntaxObject);
 
     /**
      * Remove a ISyntaxObject.
      *
      * @param syntaxObject ISyntaxObject to remove.
      */
-    void removeSyntaxObject(ISyntaxObject syntaxObject);
+    void remove(ISyntaxObject syntaxObject);
 
     /**
      * Return the Collection of ISyntaxObject.
