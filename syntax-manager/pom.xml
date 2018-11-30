@@ -10,7 +10,7 @@
         <artifactId>framework</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>bundle-manager</artifactId>
+    <artifactId>syntax-manager</artifactId>
     <packaging>bundle</packaging>
 
     <!-- Dependencies -->
@@ -24,35 +24,13 @@
             <artifactId>junit-jupiter-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.service.obr</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.orbisgis</groupId>
-            <artifactId>bundle-manager-api</artifactId>
+            <artifactId>syntax-manager-api</artifactId>
             <version>${parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.enterprise</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.orbisgis</groupId>
-            <artifactId>syntax-manager</artifactId>
-            <version>${parent.version}</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -63,12 +41,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Bundle-Vendor>Lab-STICC - CNRS UMR 6285</Bundle-Vendor>
-                        <Import-Service>org.osgi.service.obr.RepositoryAdmin</Import-Service>
-                    </instructions>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
