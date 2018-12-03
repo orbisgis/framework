@@ -78,7 +78,7 @@ public class Main {
     private static final String UI_ARCHETYPE = "uiArchetype.properties";
     private static final Version VERSION = new Version(6, 0, 0, "SNAPSHOT");
 
-    private static final int[] SUPPORTED_JAVA_VERSION = {8, 9, 10, 11};
+    private static final int[] SUPPORTED_JAVA_VERSION = {11};
 
     /**
      * Entry method of OrbisGIS. The input argument are parsed and then different checks are done to ensure the good
