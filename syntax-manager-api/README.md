@@ -1,7 +1,7 @@
 # Syntax Manager API
 
 The syntax manager API contains the interfaces used for the exposition
-of the syntax object. This exposition allow to reuse object instances
+of the syntax object. This exposition allows to reuse object instances
 (such as utilities, services or classes) under a variable name. The
 main usage for this API is to permit to register Object as predefined
 properties in languages script engine/shell (like Groovy, R ...).
