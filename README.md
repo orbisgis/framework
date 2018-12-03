@@ -2,6 +2,7 @@
 
 This framework is used to manage all the basic OrbisGIS OSGi modules
 in order to set a basic framework for the creation of other modules.
+It requires JAVA 11.
 
 ### Utility modules
 
