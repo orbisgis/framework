@@ -12,7 +12,7 @@
         <dependency>
             <groupId>org.orbisgis</groupId>
             <artifactId>workspace-api</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>        
         <dependency>
             <groupId>org.junit.jupiter</groupId>

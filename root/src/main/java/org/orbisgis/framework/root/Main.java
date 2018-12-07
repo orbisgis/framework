@@ -37,6 +37,7 @@
 package org.orbisgis.framework.root;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.main.AutoProcessor;
 import org.osgi.framework.Constants;
@@ -47,12 +48,19 @@ import org.osgi.framework.launch.FrameworkFactory;
 
 import javax.swing.*;
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Entry point of the framework. It only launch the OSGI service.
@@ -60,7 +68,7 @@ import java.util.Map;
  * @author Sylvain PALOMINOS (UBS 2018)
  * @author Erwan Bocher (CNRS)
  */
-//TODO make string static
+
 public class Main {
 
     private static Framework m_fwk = null;
@@ -77,6 +85,15 @@ public class Main {
     private static final String MIN_ARCHETYPE = "minArchetype.properties";
     private static final String UI_ARCHETYPE = "uiArchetype.properties";
     private static final Version VERSION = new Version(6, 0, 0, "SNAPSHOT");
+
+    private static final String FX11_VERSION = "11.0.1";
+    private static final String FX11_LINUX = "https://download2.gluonhq.com/openjfx/11.0.1/openjfx-" + FX11_VERSION + "_linux-x64_bin-sdk.zip";
+    private static final String FX11_WINDOWS = "https://download2.gluonhq.com/openjfx/11.0.1/openjfx-" + FX11_VERSION + "_windows-x64_bin-sdk.zip";
+    private static final String FX11_MAC = "https://download2.gluonhq.com/openjfx/11.0.1/openjfx-" + FX11_VERSION + "_osx-x64_bin-sdk.zip";
+    private static final String FX11_SDK = "FX11_SDK";
+    private static final String FX11_SDK_LIB = "lib";
+    private static final String FX11_SDK_BIN = "bin";
+    private static final String FX11_SDK_PREFIX = "javafx-sdk-";
 
     private static final int[] SUPPORTED_JAVA_VERSION = {11};
 
@@ -133,7 +150,7 @@ public class Main {
         org.apache.felix.main.Main.copySystemProperties(configProps);
 
         // If there is a passed in bundle auto-deploy directory, then that overwrites anything in the config file.
-        configProps.put(AutoProcessor.AUTO_DEPLOY_DIR_PROPERY, systemWorkspace.getBundleFolderPath());
+        configProps.put(AutoProcessor.AUTO_DEPLOY_DIR_PROPERTY, systemWorkspace.getBundleFolderPath());
 
         // If there is a passed in bundle cache directory, then that overwrites anything in the config file.
         configProps.put(Constants.FRAMEWORK_STORAGE, systemWorkspace.getCacheFolderPath());
@@ -212,18 +229,14 @@ public class Main {
         URL url = org.apache.felix.main.Main.class.getClassLoader()
                 .getResource("META-INF/services/org.osgi.framework.launch.FrameworkFactory");
         if (url != null) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-            try {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
                 for (String s = br.readLine(); s != null; s = br.readLine()) {
                     s = s.trim();
                     // Try to load first non-empty, non-commented line.
                     if ((s.length() > 0) && (s.charAt(0) != '#')) {
-                        return (FrameworkFactory) Class.forName(s).newInstance();
+                        return (FrameworkFactory) Class.forName(s).getDeclaredConstructor().newInstance();
                     }
                 }
-            }
-            finally {
-                br.close();
             }
         }
         throw new Exception("Could not find framework factory.");
@@ -252,21 +265,63 @@ public class Main {
      * @return True if the version is supported, false otherwise.
      */
     private static boolean checkJavaVersion() {
-        String actualVersion = System.getProperty("java.version");
-        LOGGER.log(Logger.LOG_DEBUG, "Check java version : "+actualVersion);
-        if(actualVersion.startsWith("1.")) {
-            actualVersion = actualVersion.substring(2, 3);
-        }
-        else if(actualVersion.startsWith("1")){
-            actualVersion = actualVersion.substring(0, 2);
-        }
-        else {
-            actualVersion = actualVersion.substring(0, 1);
-        }
-        int intVersion = Integer.parseInt(actualVersion);
         for(int supportedVersion : SUPPORTED_JAVA_VERSION){
-            if(intVersion == supportedVersion){
-                return true;
+            switch (supportedVersion) {
+                case 1 :
+                    if(SystemUtils.IS_JAVA_1_1){
+                        return true;
+                    }
+                    break;
+                case 2 :
+                    if(SystemUtils.IS_JAVA_1_2){
+                        return true;
+                    }
+                    break;
+                case 3 :
+                    if(SystemUtils.IS_JAVA_1_3){
+                        return true;
+                    }
+                    break;
+                case 4 :
+                    if(SystemUtils.IS_JAVA_1_4){
+                        return true;
+                    }
+                    break;
+                case 5 :
+                    if(SystemUtils.IS_JAVA_1_5){
+                        return true;
+                    }
+                    break;
+                case 6 :
+                    if(SystemUtils.IS_JAVA_1_6){
+                        return true;
+                    }
+                    break;
+                case 7 :
+                    if(SystemUtils.IS_JAVA_1_7){
+                        return true;
+                    }
+                    break;
+                case 8 :
+                    if(SystemUtils.IS_JAVA_1_8){
+                        return true;
+                    }
+                    break;
+                case 9 :
+                    if(SystemUtils.IS_JAVA_9){
+                        return true;
+                    }
+                    break;
+                case 10 :
+                    if(SystemUtils.IS_JAVA_10){
+                        return true;
+                    }
+                    break;
+                case 11 :
+                    if(SystemUtils.IS_JAVA_11){
+                        return true;
+                    }
+                    break;
             }
         }
         return false;
@@ -286,11 +341,12 @@ public class Main {
         final CommandLineParser parser = new DefaultParser();
 
         //First check the first options (like the 'help' one).
-        CommandLine line = null;
+        CommandLine line;
         try {
             line = parser.parse(firstOptions, args, true);
         } catch (ParseException e) {
             showError("Error on parsing argument.\n"+e.getLocalizedMessage(), true);
+            return false;
         }
         //Check the -h/--help argument
         if(line.hasOption("help")) {
@@ -329,13 +385,6 @@ public class Main {
                 showError(message, true);
             }
         }
-        //Check the --noUI argument
-        if(!line.hasOption("noUI")){
-            NO_UI_MODE = false;
-        }
-        else{
-            NO_UI_MODE = true;
-        }
         //Check the --workspace argument
         if(line.hasOption("workspace")){
             systemWorkspace = new SystemWorkspace(line.getOptionValue("workspace").trim(), VERSION.getMajor(),
@@ -346,6 +395,16 @@ public class Main {
         }
         if(!systemWorkspace.loadWorkspace(NO_FAIL_MODE)){
             showError("Error get while loading the workspace", true);
+        }
+        //Check the --noUI argument
+        if(!line.hasOption("noUI")){
+            NO_UI_MODE = false;
+            if(!isJavaFXInstalled()){
+                loadJavaFX();
+            }
+        }
+        else{
+            NO_UI_MODE = true;
         }
         //Check the --configProperties argument
         InputStream inStream = null;
@@ -375,6 +434,140 @@ public class Main {
             showError(message, true);
         }
         return true;
+    }
+
+    /**
+     * Return true if FX is installed, false otherwise.
+     *
+     * @return True if FX is installed, false otherwise.
+     */
+    private static boolean isJavaFXInstalled(){
+        return false;
+    }
+
+    /**
+     * Install the JavaFX library and return its folder.
+     *
+     * @return The folder of the JavaFX installation.
+     */
+    private static File installJavaFX(){
+        //Create the library URL
+        URL sdkUrl;
+        try {
+            if (SystemUtils.IS_OS_LINUX) {
+                sdkUrl = new URL(FX11_LINUX);
+            } else if (SystemUtils.IS_OS_WINDOWS) {
+                sdkUrl = new URL(FX11_WINDOWS);
+            } else if (SystemUtils.IS_OS_MAC) {
+                sdkUrl = new URL(FX11_MAC);
+            } else {
+                LOGGER.log(Logger.LOG_ERROR, "Unable to find FX11 SDK for you operating system.");
+                return null;
+            }
+        } catch (MalformedURLException e) {
+            LOGGER.log(Logger.LOG_ERROR, "Unable to create the URL of the FX11 SDK.\n" + e.getLocalizedMessage());
+            return null;
+        }
+        //Download and unzip the library
+        LOGGER.log(Logger.LOG_DEBUG, "Downloading JavaFX 11 SDK from '" + sdkUrl + "'");
+        File sdkFolder = new File(systemWorkspace.getWorkspaceFolderPath(), FX11_SDK);
+        if(!sdkFolder.mkdirs()){
+            LOGGER.log(Logger.LOG_ERROR, "Unable to create the folder '" + sdkFolder.getAbsolutePath() + "'");
+            return null;
+        }
+        File unzippedSdk = downloadAndUnzip(sdkUrl, sdkFolder);
+        if(unzippedSdk == null || !unzippedSdk.exists() || !unzippedSdk.isDirectory()) {
+            LOGGER.log(Logger.LOG_ERROR, "Unable to access to the unzipped FX11 SDK");
+            return null;
+        }
+        return unzippedSdk;
+    }
+
+    /**
+     * Load JavaFX. If it is not present in the workspace, install it before.
+     */
+    private static void loadJavaFX(){
+        LOGGER.log(Logger.LOG_INFO, "Installation of JavaFX 11 SDK.");
+        File lib;
+        //Test if FX has been already downloaded
+        Path path = Paths.get( systemWorkspace.getWorkspaceFolderPath() + File.separator + FX11_SDK + File.separator +
+                        FX11_SDK_PREFIX + FX11_VERSION + File.separator + FX11_SDK_LIB);
+        if(!Files.exists(path)) {
+            //Install the FX libraries
+            File unzippedSdk = installJavaFX();
+            LOGGER.log(Logger.LOG_DEBUG, "Loading JavaFX 11 SDK.");
+            if(SystemUtils.IS_OS_WINDOWS){
+                lib = new File(unzippedSdk, FX11_SDK_BIN);
+            }
+            else{
+                lib = new File(unzippedSdk, FX11_SDK_LIB);
+            }
+            if(!lib.exists() || !lib.isDirectory()) {
+                LOGGER.log(Logger.LOG_ERROR, "Unable to access to the unzipped FX11 SDK lib folder");
+                return;
+            }
+        }
+        else{
+            lib = new File(path.toUri());
+        }
+        System.getProperties().put("java.library.path", System.getProperties().get("java.library.path")+":"+lib.getAbsolutePath());
+        LOGGER.log(Logger.LOG_DEBUG, "JavaFX 11 SDK successfully installed.");
+    }
+
+    /**
+     * Download the given URL, unzip it and return the folder.
+     *
+     * @param dlUrl URL to download.
+     * @param destinationFolder Folder where it should be unzipped.
+     *
+     * @return The unzipped folder.
+     */
+    private static File downloadAndUnzip(URL dlUrl, File destinationFolder){
+        File zipFile = new File(destinationFolder, FX11_SDK+".zip");
+        try {
+            ReadableByteChannel rbc = Channels.newChannel(dlUrl.openStream());
+            FileOutputStream fos = new FileOutputStream(zipFile);
+            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+        } catch (FileNotFoundException e) {
+            LOGGER.log(Logger.LOG_ERROR, "Unable to open the destination file '" + zipFile + "'\n" +
+                    e.getLocalizedMessage());
+        } catch (IOException e) {
+            LOGGER.log(Logger.LOG_ERROR, "Unable to download the url '" + dlUrl + "'\n" + e.getLocalizedMessage());
+        }
+
+        try {
+            File rootDirectory = null;
+            byte[] buffer = new byte[1024];
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
+            ZipEntry zipEntry = zis.getNextEntry();
+            while (zipEntry != null) {
+                if(zipEntry.isDirectory()){
+                    Path path = Paths.get(destinationFolder.getAbsolutePath()+File.separator+zipEntry.getName());
+                    Files.createDirectories(path);
+                    if(rootDirectory == null){
+                        rootDirectory = new File(path.toUri());
+                    }
+                }
+                else {
+                    File newFile = new File(destinationFolder, zipEntry.getName());
+                    FileOutputStream fos = new FileOutputStream(newFile);
+                    int len;
+                    while ((len = zis.read(buffer)) > 0) {
+                        fos.write(buffer, 0, len);
+                    }
+                    fos.close();
+                }
+                zipEntry = zis.getNextEntry();
+            }
+            zis.closeEntry();
+            zis.close();
+            return rootDirectory;
+        } catch (FileNotFoundException e) {
+            LOGGER.log(Logger.LOG_ERROR, "File not found.\n" + e.getLocalizedMessage());
+        } catch (IOException e) {
+            LOGGER.log(Logger.LOG_ERROR, "Unable to read/write.\n" + e.getLocalizedMessage());
+        }
+        return null;
     }
 
     /**
