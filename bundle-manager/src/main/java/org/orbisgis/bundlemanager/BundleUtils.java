@@ -48,7 +48,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
 
 /**
  * Implementation of the interface {@link org.orbisgis.bundlemanagerapi.IBundleUtils} interface with the OSGI framework.
@@ -63,11 +68,18 @@ public class BundleUtils implements IBundleUtils, ISyntaxObject {
     private static final Logger LOGGER = LoggerFactory.getLogger(BundleUtils.class);
     /** SyntaxObject name */
     private static final String NAME = "bundle";
+    private static final URI ORBISGIS_OSGI_REPOSITORY = URI.create("http://plugins.orbisgis.org/.meta/obr.xml");
+    private static final URI ORBISGIS_OSGI_REPOSITORY_SNAPSHOT =
+            URI.create("http://nexus.orbisgis.org/content/shadows/obr-snapshot/.meta/obr.xml");
     /** {@link org.osgi.service.obr.RepositoryAdmin} used for the bundle resolution. */
     private RepositoryAdmin repositoryAdmin;
 
     @Activate
     public void init(){
+        List<URI> serverURIList = new ArrayList<>();
+        serverURIList.add(ORBISGIS_OSGI_REPOSITORY);
+        serverURIList.add(ORBISGIS_OSGI_REPOSITORY_SNAPSHOT);
+        Executors.newSingleThreadExecutor().execute(new RegisterRepositories(serverURIList));
         LOGGER.debug("Component started");
     }
 
@@ -294,5 +306,32 @@ public class BundleUtils implements IBundleUtils, ISyntaxObject {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    private class RegisterRepositories implements Runnable {
+
+        List<URI> serverURIList;
+
+        public RegisterRepositories(List<URI> serverURIList){
+            this.serverURIList = serverURIList;
+        }
+
+        @Override
+        public void run() {
+            for(URI serverURI : serverURIList) {
+                try {
+                    repositoryAdmin.addRepository(serverURI.toURL());
+                } catch (Exception ex) {
+                    //Tests if the exception is because of a problem accessing to the OrbisGIS nexus.
+                    if (ex.getCause() instanceof UnknownHostException &&
+                            ex.getCause().getMessage().equals(serverURI.getAuthority())) {
+                        LOGGER.error("Unable to access to " + serverURI.getAuthority() +
+                                ". Please check your internet connexion.");
+                    } else {
+                        LOGGER.error(ex.getLocalizedMessage(), ex);
+                    }
+                }
+            }
+        }
     }
 }
