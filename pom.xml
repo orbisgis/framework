@@ -118,7 +118,7 @@
         <pluginManagement>
             <plugins>
                 <!-- Ensure java 11 is used -->
-                <plugin>
+                <!--<plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.0.0-M2</version>
@@ -137,7 +137,7 @@
                             </configuration>
                         </execution>
                     </executions>
-                </plugin>
+                </plugin>-->
                 <!-- Configure the exec:exec goal -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -172,7 +172,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.0</version>
                     <configuration>
-                        <release>11</release>-
+                        <source>1.8</source>
+                        <target>1.8</target>
                     </configuration>
                 </plugin>
                 <!-- Test -->

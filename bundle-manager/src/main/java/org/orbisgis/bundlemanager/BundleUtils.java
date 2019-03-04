@@ -38,6 +38,7 @@ package org.orbisgis.bundlemanager;
 
 import org.orbisgis.bundlemanagerapi.IBundleUtils;
 import org.orbisgis.syntaxmanagerapi.ISyntaxObject;
+import org.osgi.framework.Version;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -48,7 +49,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
 
 /**
  * Implementation of the interface {@link org.orbisgis.bundlemanagerapi.IBundleUtils} interface with the OSGI framework.
@@ -63,11 +69,18 @@ public class BundleUtils implements IBundleUtils, ISyntaxObject {
     private static final Logger LOGGER = LoggerFactory.getLogger(BundleUtils.class);
     /** SyntaxObject name */
     private static final String NAME = "bundle";
+    private static final URI ORBISGIS_OSGI_REPOSITORY = URI.create("http://plugins.orbisgis.org/.meta/obr.xml");
+    private static final URI ORBISGIS_OSGI_REPOSITORY_SNAPSHOT =
+            URI.create("http://nexus.orbisgis.org/content/shadows/obr-snapshot/.meta/obr.xml");
     /** {@link org.osgi.service.obr.RepositoryAdmin} used for the bundle resolution. */
     private RepositoryAdmin repositoryAdmin;
 
     @Activate
     public void init(){
+        List<URI> serverURIList = new ArrayList<>();
+        serverURIList.add(ORBISGIS_OSGI_REPOSITORY);
+        serverURIList.add(ORBISGIS_OSGI_REPOSITORY_SNAPSHOT);
+        Executors.newSingleThreadExecutor().execute(new RegisterRepositories(serverURIList));
         LOGGER.debug("Component started");
     }
 
@@ -86,22 +99,39 @@ public class BundleUtils implements IBundleUtils, ISyntaxObject {
     @Override
     public boolean install(String groupId, String artifactId){
         LOGGER.debug("Trying to install bundle '"+groupId+"."+artifactId+"' from OBR repositories");
+        Resource higherVersion = null;
         for(Repository repository : repositoryAdmin.listRepositories()){
             for(Resource resource : repository.getResources()){
                 if(resource.getSymbolicName().equals(groupId+"."+artifactId)) {
-                    LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' found");
-                    BundleItem bundleItem = new BundleItem(repositoryAdmin.resolver(), resource);
-                    bundleItem.install();
-                    if(bundleItem.isInstalled()){
-                        LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' installed");
+                    if(higherVersion == null || resource.getVersion().compareTo(higherVersion.getVersion()) > 0){
+                        higherVersion = resource;
                     }
-                    else{
-                        LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' not installed");
-                    }
-                    return bundleItem.isInstalled();
+                    LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' version '"+resource.getVersion()+"' found");
                 }
             }
+            LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' not found in repository '"+repository.getName()+"'");
         }
+        if(higherVersion != null){
+            BundleItem bundleItem = new BundleItem(repositoryAdmin.resolver(), higherVersion);
+            bundleItem.install();
+            if(bundleItem.isInstalled()){
+                LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' version '"+higherVersion.getVersion()+"' installed");
+            }
+            else{
+                LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' version '"+higherVersion.getVersion()+"' not installed");
+                return false;
+            }
+            bundleItem.start();
+            if(bundleItem.isStarted()){
+                LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' version '"+higherVersion.getVersion()+"'  started");
+                return true;
+            }
+            else{
+                LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' version '"+higherVersion.getVersion()+"'  not started");
+                return false;
+            }
+        }
+        LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' not found");
         return false;
     }
 
@@ -294,5 +324,32 @@ public class BundleUtils implements IBundleUtils, ISyntaxObject {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    private class RegisterRepositories implements Runnable {
+
+        List<URI> serverURIList;
+
+        public RegisterRepositories(List<URI> serverURIList){
+            this.serverURIList = serverURIList;
+        }
+
+        @Override
+        public void run() {
+            for(URI serverURI : serverURIList) {
+                try {
+                    repositoryAdmin.addRepository(serverURI.toURL());
+                } catch (Exception ex) {
+                    //Tests if the exception is because of a problem accessing to the OrbisGIS nexus.
+                    if (ex.getCause() instanceof UnknownHostException &&
+                            ex.getCause().getMessage().equals(serverURI.getAuthority())) {
+                        LOGGER.error("Unable to access to " + serverURI.getAuthority() +
+                                ". Please check your internet connexion.");
+                    } else {
+                        LOGGER.error(ex.getLocalizedMessage(), ex);
+                    }
+                }
+            }
+        }
     }
 }
