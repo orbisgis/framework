@@ -79,7 +79,7 @@ public class BundleItem implements IBundleItem {
         this.resolver.add(resource);
         this.resource = resource;
         for(Bundle bundle : FrameworkUtil.getBundle(BundleItem.class).getBundleContext().getBundles()){
-            if(bundle.getSymbolicName().equals(resource.getSymbolicName())){
+            if(bundle.getSymbolicName() != null && bundle.getSymbolicName().equals(resource.getSymbolicName())){
                 this.id = bundle.getBundleId();
             }
         }
@@ -103,35 +103,38 @@ public class BundleItem implements IBundleItem {
     public void install() {
         if(isInstallReady()) {
             resolver.resolve();
-            Requirement[] requirements = resolver.getUnsatisfiedRequirements();
-            if ((requirements != null) && (requirements.length > 0)) {
+            Resource[] resources = resolver.getRequiredResources();
+            if ((resources != null) && (resources.length > 0)) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("Unsatisfied requirement :\n");
-                for (Requirement requirement : requirements) {
-                    sb.append("\t");
-                    sb.append(requirement.getFilter());
-                    sb.append("\n");
-                    for (Resource resource : resolver.getResources(requirement)) {
-                        sb.append("\t");
+                for (Resource resource : resources) {
+                    sb.append(resource.getPresentationName());
+                    sb.append(" (");
+                    sb.append(resource.getVersion());
+                    sb.append(")\n");
+                }
+                resources = resolver.getOptionalResources();
+                if ((resources != null) && (resources.length > 0)) {
+                    for (Resource resource : resources) {
+                        sb.append("Optional, ");
                         sb.append(resource.getPresentationName());
                         sb.append(" (");
                         sb.append(resource.getVersion());
                         sb.append(")\n");
                     }
                 }
-                LOGGER.error(sb.toString());
-                return;
+                LOGGER.info(sb.toString());
             }
             resolver.deploy(true);
             for (Bundle bundle : FrameworkUtil.getBundle(BundleItem.class).getBundleContext().getBundles()) {
-                if (bundle.getSymbolicName().equals(resource.getSymbolicName())) {
+                if (bundle.getSymbolicName() != null && bundle.getSymbolicName().equals(resource.getSymbolicName())) {
                     this.id = bundle.getBundleId();
                 }
             }
             try {
                 getBundle().stop();
             } catch (BundleException e) {
-                LOGGER.error("Error on installing the bundle");
+                LOGGER.error("Error on installing the bundle.\n"+e.getLocalizedMessage());
             }
         }
     }

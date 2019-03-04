@@ -38,6 +38,7 @@ package org.orbisgis.bundlemanager;
 
 import org.orbisgis.bundlemanagerapi.IBundleUtils;
 import org.orbisgis.syntaxmanagerapi.ISyntaxObject;
+import org.osgi.framework.Version;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -98,22 +99,39 @@ public class BundleUtils implements IBundleUtils, ISyntaxObject {
     @Override
     public boolean install(String groupId, String artifactId){
         LOGGER.debug("Trying to install bundle '"+groupId+"."+artifactId+"' from OBR repositories");
+        Resource higherVersion = null;
         for(Repository repository : repositoryAdmin.listRepositories()){
             for(Resource resource : repository.getResources()){
                 if(resource.getSymbolicName().equals(groupId+"."+artifactId)) {
-                    LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' found");
-                    BundleItem bundleItem = new BundleItem(repositoryAdmin.resolver(), resource);
-                    bundleItem.install();
-                    if(bundleItem.isInstalled()){
-                        LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' installed");
+                    if(higherVersion == null || resource.getVersion().compareTo(higherVersion.getVersion()) > 0){
+                        higherVersion = resource;
                     }
-                    else{
-                        LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' not installed");
-                    }
-                    return bundleItem.isInstalled();
+                    LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' version '"+resource.getVersion()+"' found");
                 }
             }
+            LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' not found in repository '"+repository.getName()+"'");
         }
+        if(higherVersion != null){
+            BundleItem bundleItem = new BundleItem(repositoryAdmin.resolver(), higherVersion);
+            bundleItem.install();
+            if(bundleItem.isInstalled()){
+                LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' version '"+higherVersion.getVersion()+"' installed");
+            }
+            else{
+                LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' version '"+higherVersion.getVersion()+"' not installed");
+                return false;
+            }
+            bundleItem.start();
+            if(bundleItem.isStarted()){
+                LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' version '"+higherVersion.getVersion()+"'  started");
+                return true;
+            }
+            else{
+                LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' version '"+higherVersion.getVersion()+"'  not started");
+                return false;
+            }
+        }
+        LOGGER.debug("Bundle '"+groupId+"."+artifactId+"' not found");
         return false;
     }
 

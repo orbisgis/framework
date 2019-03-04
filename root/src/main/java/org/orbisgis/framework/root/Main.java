@@ -400,7 +400,7 @@ public class Main {
         if(!line.hasOption("noUI")){
             NO_UI_MODE = false;
             if(!isJavaFXInstalled()){
-                loadJavaFX();
+                //loadJavaFX();
             }
         }
         else{
